@@ -9,7 +9,9 @@ enum HTTPClient {
         path: String,
         queryItems: [URLQueryItem]? = nil,
         body: Data? = nil,
-        idempotencyKey: String? = nil
+        idempotencyKey: String? = nil,
+        useXApiKey: Bool = false,
+        skipAuth: Bool = false
     ) async throws -> Data {
         var urlString = baseURL.hasSuffix("/") ? String(baseURL.dropLast()) : baseURL
         urlString += path.hasPrefix("/") ? path : "/" + path
@@ -23,8 +25,16 @@ enum HTTPClient {
         }
         var req = URLRequest(url: url)
         req.httpMethod = method
-        req.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
-        req.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        if body != nil {
+            req.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        }
+        if !skipAuth {
+            if useXApiKey {
+                req.setValue(apiKey, forHTTPHeaderField: "X-Api-Key")
+            } else {
+                req.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
+            }
+        }
         if let k = idempotencyKey { req.setValue(k, forHTTPHeaderField: "Idempotency-Key") }
         req.httpBody = body
         let (data, response) = try await URLSession.shared.data(for: req)
