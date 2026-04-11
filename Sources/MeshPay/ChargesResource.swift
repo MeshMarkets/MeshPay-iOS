@@ -33,6 +33,15 @@ public struct ChargesResource {
         return JSONUtil.object(data)
     }
 
+    public func createPooledCharge(body: [String: Any], idempotencyKey: String) async throws -> [String: Any] {
+        let b = try JSONSerialization.data(withJSONObject: body)
+        let data = try await HTTPClient.request(
+            baseURL: baseURL, apiKey: apiKey, method: "POST", path: "/pooled-charges",
+            body: b, idempotencyKey: idempotencyKey, useXApiKey: useXApiKey
+        )
+        return JSONUtil.object(data)
+    }
+
     public func fund(chargeId: String, body: [String: Any], idempotencyKey: String) async throws -> [String: Any] {
         let b = try JSONSerialization.data(withJSONObject: body)
         let data = try await HTTPClient.request(

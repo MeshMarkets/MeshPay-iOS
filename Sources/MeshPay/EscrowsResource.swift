@@ -32,6 +32,33 @@ public struct EscrowsResource {
         return JSONUtil.object(data)
     }
 
+    public func createContribution(escrowId: String, body: [String: Any], idempotencyKey: String) async throws -> [String: Any] {
+        let b = try JSONSerialization.data(withJSONObject: body)
+        let data = try await HTTPClient.request(
+            baseURL: baseURL, apiKey: apiKey, method: "POST", path: "/escrows/\(escrowId)/contributions",
+            body: b, idempotencyKey: idempotencyKey, useXApiKey: useXApiKey
+        )
+        return JSONUtil.object(data)
+    }
+
+    public func setPayee(escrowId: String, body: [String: Any], idempotencyKey: String) async throws -> [String: Any] {
+        let b = try JSONSerialization.data(withJSONObject: body)
+        let data = try await HTTPClient.request(
+            baseURL: baseURL, apiKey: apiKey, method: "POST", path: "/escrows/\(escrowId)/set-payee",
+            body: b, idempotencyKey: idempotencyKey, useXApiKey: useXApiKey
+        )
+        return JSONUtil.object(data)
+    }
+
+    public func cancelPooledEscrow(escrowId: String, idempotencyKey: String) async throws -> [String: Any] {
+        let body = try JSONSerialization.data(withJSONObject: [String: Any]())
+        let data = try await HTTPClient.request(
+            baseURL: baseURL, apiKey: apiKey, method: "POST", path: "/escrows/\(escrowId)/cancel-pool",
+            body: body, idempotencyKey: idempotencyKey, useXApiKey: useXApiKey
+        )
+        return JSONUtil.object(data)
+    }
+
     public func openDispute(escrowId: String, txHash: String) async throws -> [String: Any] {
         let body = try JSONSerialization.data(withJSONObject: ["tx_hash": txHash])
         let data = try await HTTPClient.request(
